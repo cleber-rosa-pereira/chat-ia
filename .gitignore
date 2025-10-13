@@ -1,0 +1,12 @@
+# dependências e builds
+node_modules/
+dist/
+build/
+
+# configs locais / segredos
+.env
+.env.local
+
+# sistema/IDE
+.DS_Store
+.vscode/
