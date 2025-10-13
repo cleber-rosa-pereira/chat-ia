@@ -1,0 +1,12 @@
+{
+  "name": "chat-ia",
+  "version": "1.0.0",
+  "description": "Sistema de chatbot com IA.\r Stack inicial:\r - Node.js 22\r - (Banco) Supabase\r - (Editor) VS Code\r - (Controle) Git + GitHub",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
