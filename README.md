@@ -18,7 +18,3 @@ Stack inicial:
 ## Como rodar (será atualizado)
 ```bash
 npm run dev
-
-3) No terminal do VS Code, rode:
-```powershell
-git status
