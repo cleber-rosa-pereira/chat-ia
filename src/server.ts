@@ -1,8 +1,10 @@
 import 'dotenv/config';
 import Fastify from 'fastify';
 import { createClient } from '@supabase/supabase-js';
+import cors from '@fastify/cors';
 
 const app = Fastify({ logger: true });
+app.register(cors, { origin: true });
 
 const url = process.env.SUPABASE_URL!;
 const anon = process.env.SUPABASE_ANON_KEY!;
