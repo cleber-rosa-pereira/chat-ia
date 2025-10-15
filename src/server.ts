@@ -18,6 +18,19 @@ app.get('/companies', async (request, reply) => {
   if (error) return reply.code(500).send({ error: error.message });
   return reply.send(data);
 });
+// GET /companies/:id - busca 1 empresa pelo id
+app.get('/companies/:id', async (request, reply) => {
+  const { id } = request.params as { id: string };
+
+  const { data, error } = await supabase
+    .from('companies')
+    .select('id, created_at, name, business_type')
+    .eq('id', id)
+    .single();
+
+  if (error) return reply.code(404).send({ error: error.message });
+  return reply.send(data);
+});
 
 // POST /companies
 app.post('/companies', async (request, reply) => {
