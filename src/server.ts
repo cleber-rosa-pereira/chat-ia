@@ -1,56 +1,49 @@
-import 'dotenv/config';
+// src/server.ts
 import Fastify from 'fastify';
-import { createClient } from '@supabase/supabase-js';
 import cors from '@fastify/cors';
+import { supabase } from './lib/supabase';
 
-const app = Fastify({ logger: true });
-app.register(cors, { origin: true });
+const app = Fastify();
 
-const url = process.env.SUPABASE_URL!;
-const anon = process.env.SUPABASE_ANON_KEY!;
-if (!url || !anon) {
-  app.log.error('❌ Faltam SUPABASE_URL / SUPABASE_ANON_KEY no .env');
-  process.exit(1);
-}
-const supabase = createClient(url, anon);
+// saúde
+app.get('/health', async () => ({ ok: true }));
 
-// healthcheck
-app.get('/health', async () => ({ status: 'ok' }));
-
-// listar mensagens
-app.get('/messages', async (_req, reply) => {
+// GET /companies
+app.get('/companies', async (request, reply) => {
   const { data, error } = await supabase
-    .from('messages')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(20);
+    .from('companies')
+    .select('id, created_at, name')
+    .order('created_at', { ascending: false });
 
   if (error) return reply.code(500).send({ error: error.message });
   return reply.send(data);
 });
 
-// criar mensagem
-app.post('/messages', async (req, reply) => {
-  const body = req.body as { text?: string };
-  const text = (body?.text ?? '').toString().trim();
-
-  if (!text) return reply.code(400).send({ error: 'text is required' });
+// POST /companies
+app.post('/companies', async (request, reply) => {
+  const body = request.body as {
+    name: string;
+    business_type?: string;
+  };
 
   const { data, error } = await supabase
-    .from('messages')
-    .insert([{ text }])
-    .select('*')
+    .from('companies')
+    .insert({
+      name: body?.name,
+      business_type: body?.business_type ?? null,
+    })
+    .select('id, created_at, name')
     .single();
 
   if (error) return reply.code(500).send({ error: error.message });
   return reply.code(201).send(data);
 });
 
-const port = Number(process.env.PORT || 3000);
-app
-  .listen({ port, host: '0.0.0.0' })
-  .then(() => app.log.info(`🚀 API up on http://localhost:${port}`))
-  .catch((err) => {
-    app.log.error(err);
-    process.exit(1);
-  });
+async function start() {
+  await app.register(cors, { origin: true }); // agora o await fica dentro de uma função
+  const PORT = 3333;
+  await app.listen({ port: PORT, host: '0.0.0.0' });
+  console.log(`🚀 API on http://localhost:${PORT}`);
+}
+
+start();
