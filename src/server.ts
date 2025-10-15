@@ -63,6 +63,20 @@ app.get('/professionals', async (_req, reply) => {
   return reply.send(data);
 });
 
+// GET /professionals/:id - busca 1 profissional
+app.get('/professionals/:id', async (request, reply) => {
+  const { id } = request.params as { id: string };
+
+  const { data, error } = await supabase
+    .from('professionals')
+    .select('id, created_at, name, role')
+    .eq('id', id)
+    .single();
+
+  if (error) return reply.code(404).send({ error: error.message });
+  return reply.send(data);
+});
+
 // POST /professionals - cria profissional
 app.post('/professionals', async (request, reply) => {
   const body = request.body as { name: string; role?: string };
