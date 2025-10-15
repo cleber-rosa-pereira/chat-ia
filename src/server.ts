@@ -52,6 +52,34 @@ app.post('/companies', async (request, reply) => {
   return reply.code(201).send(data);
 });
 
+// GET /professionals - lista profissionais
+app.get('/professionals', async (_req, reply) => {
+  const { data, error } = await supabase
+    .from('professionals')
+    .select('id, created_at, name, role')
+    .order('created_at', { ascending: false });
+
+  if (error) return reply.code(500).send({ error: error.message });
+  return reply.send(data);
+});
+
+// POST /professionals - cria profissional
+app.post('/professionals', async (request, reply) => {
+  const body = request.body as { name: string; role?: string };
+
+  const { data, error } = await supabase
+    .from('professionals')
+    .insert({
+      name: body?.name,
+      role: body?.role ?? null
+    })
+    .select('id, created_at, name, role')
+    .single();
+
+  if (error) return reply.code(500).send({ error: error.message });
+  return reply.code(201).send(data);
+});
+
 async function start() {
   await app.register(cors, { origin: true }); // agora o await fica dentro de uma função
   const PORT = 3333;
