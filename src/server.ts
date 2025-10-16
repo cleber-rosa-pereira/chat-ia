@@ -52,12 +52,18 @@ app.post('/companies', async (request, reply) => {
   return reply.code(201).send(data);
 });
 
-// GET /professionals - lista profissionais
-app.get('/professionals', async (_req, reply) => {
-  const { data, error } = await supabase
+// GET /professionals - lista profissionais (pode filtrar por company_id)
+app.get('/professionals', async (req, reply) => {
+  const { company_id } = (req.query as { company_id?: string }) || {};
+
+  const query = supabase
     .from('professionals')
-    .select('id, created_at, name, role')
+    .select('id, created_at, name, role, company_id')
     .order('created_at', { ascending: false });
+
+  const { data, error } = company_id
+    ? await query.eq('company_id', company_id)
+    : await query;
 
   if (error) return reply.code(500).send({ error: error.message });
   return reply.send(data);
@@ -79,15 +85,16 @@ app.get('/professionals/:id', async (request, reply) => {
 
 // POST /professionals - cria profissional
 app.post('/professionals', async (request, reply) => {
-  const body = request.body as { name: string; role?: string };
+  const body = request.body as { name: string; role?: string; company_id?: string };
 
   const { data, error } = await supabase
     .from('professionals')
     .insert({
       name: body?.name,
-      role: body?.role ?? null
+      role: body?.role ?? null,
+      company_id: body?.company_id ?? null
     })
-    .select('id, created_at, name, role')
+    .select('id, created_at, name, role, company_id')
     .single();
 
   if (error) return reply.code(500).send({ error: error.message });
