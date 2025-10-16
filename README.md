@@ -18,3 +18,48 @@ Stack inicial:
 ## Como rodar (será atualizado)
 ```bash
 npm run dev
+
+## Endpoints — Professionals
+
+### POST /professionals
+Cria um profissional.
+
+**Body (JSON)**
+```json
+{
+  "name": "Carla Mendes",
+  "role": "massoterapeuta",
+  "company_id": "UUID_DA_EMPRESA"
+}
+**Resposta (200/201)**
+- JSON com: `id`, `created_at`, `name`, `role`, `company_id`.
+
+**Erros comuns**
+- 400/422: falta `name` ou `role`.
+- 409/422: `company_id` não existe (quebra de FK).
+
+**Exemplo (PowerShell)**
+```powershell
+Invoke-RestMethod -Method Post -Uri "http://localhost:3333/professionals" -ContentType "application/json" -Body '{"name":"Carla Mendes","role":"massoterapeuta","company_id":"SEU_UUID"}'
+
+### GET /professionals
+Lista profissionais. Pode filtrar por empresa.
+
+**Query params**
+- `company_id` (opcional): UUID da empresa.
+
+**Respostas**
+- 200 + `[]` se não houver itens.
+- 200 + lista com objetos `{ id, created_at, name, role, company_id }`.
+
+**Exemplos**
+- Todos:
+http://localhost:3333/professionals
+
+diff
+Copiar código
+- Apenas de uma empresa:
+http://localhost:3333/professionals?company_id=SEU_UUID
+
+sql
+Copiar código
