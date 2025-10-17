@@ -114,3 +114,31 @@ http://localhost:3333/service_media?service_id=EQ_SEU_SERVICE_ID&select=id,kind,
 
 sql
 Copiar código
+
+### GET /service_professional
+Lista vínculos entre serviços e profissionais (N:N). Útil para saber quem executa cada serviço.
+
+**Query params**
+- `service_id` (opcional): UUID do serviço.
+- `professional_id` (opcional): UUID do profissional.
+
+**Respostas**
+- 200 + `[]` se não houver itens.
+- 200 + lista com objetos `{ service_id, professional_id, created_at }`.
+
+**Exemplos**
+- Vínculos com nomes (join implícito):
+http://localhost:3333/service_professional?select=service:services(id,name),professional:professionals(id,name),created_at
+
+diff
+Copiar código
+- Por serviço específico:
+http://localhost:3333/service_professional?service_id=EQ_SEU_SERVICE_ID&select=professional:professionals(id,name)
+
+diff
+Copiar código
+- Por profissional específico:
+http://localhost:3333/service_professional?professional_id=EQ_SEU_PROFESSIONAL_ID&select=service:services(id,name)
+
+sql
+Copiar código
