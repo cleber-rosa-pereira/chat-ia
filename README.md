@@ -91,3 +91,26 @@ http://localhost:3333/services?company_id=SEU_UUID&active=true
 
 sql
 Copiar código
+
+### GET /service_media
+Lista mídias (imagens/vídeos) dos serviços. Filtra por empresa via relação com `services`.
+
+**Query params**
+- `service_id` (opcional): UUID do serviço.
+- (indireto) `company_id`: use join implícito `service:services(...)` para filtrar pela empresa.
+
+**Respostas**
+- 200 + `[]` se não houver itens.
+- 200 + lista com objetos `{ id, created_at, service_id, url, kind }`.
+
+**Exemplos**
+- Todas as mídias (com nome do serviço):
+http://localhost:3333/service_media?select=id,kind,url,service:services(id,name)
+
+diff
+Copiar código
+- Mídias de um serviço específico:
+http://localhost:3333/service_media?service_id=EQ_SEU_SERVICE_ID&select=id,kind,url
+
+sql
+Copiar código
