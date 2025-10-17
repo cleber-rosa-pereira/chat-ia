@@ -63,3 +63,31 @@ http://localhost:3333/professionals?company_id=SEU_UUID
 
 sql
 Copiar código
+
+### GET /services
+Lista serviços do catálogo. Pode filtrar por empresa.
+
+**Query params**
+- `company_id` (opcional): UUID da empresa.
+- `active` (opcional): `true` ou `false`.
+
+**Respostas**
+- 200 + `[]` se não houver itens.
+- 200 + lista com objetos `{ id, created_at, company_id, name, description, price, duration_minutes, active }`.
+
+**Exemplos**
+- Todos:
+http://localhost:3333/services
+
+diff
+Copiar código
+- Apenas de uma empresa:
+http://localhost:3333/services?company_id=SEU_UUID
+
+diff
+Copiar código
+- Apenas ativos da empresa:
+http://localhost:3333/services?company_id=SEU_UUID&active=true
+
+sql
+Copiar código
