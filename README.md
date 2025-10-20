@@ -142,3 +142,29 @@ http://localhost:3333/service_professional?professional_id=EQ_SEU_PROFESSIONAL_I
 
 sql
 Copiar código
+
+## POST /appointments
+
+Cria um agendamento.
+
+### Corpo (JSON)
+```json
+{
+  "company_id": "UUID",
+  "service_id": "UUID",
+  "professional_id": "UUID",
+  "customer_name": "string",
+  "customer_phone": "string",
+  "start_time": "ISO-8601 (UTC) ex.: 2025-10-21T17:00:00Z",
+  "end_time": "ISO-8601 (UTC) ex.: 2025-10-21T18:00:00Z",
+  "deposit_amount": 0,
+  "deposit_status": "none",
+  "notes": "string opcional"
+}
+
+### Debug (logs da API)
+Para ver logs de diagnóstico do POST /appointments:
+
+**PowerShell (Windows):**
+```powershell
+$env:DEBUG="1"; npm run dev
