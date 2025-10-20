@@ -356,8 +356,37 @@ app.post('/appointments', async (req, reply) => {
         return reply.code(400).send({ error: 'bad_request', message: `campo obrigatório: ${k}` });
       }
     }
+// ... aqui termina o for dos campos obrigatórios
 
-    const authHeader = (req.headers['authorization'] ?? '') as string;
+// === checagem anti "duas reservas" (cole aqui) ===
+const { company_id, professional_id, start_time, end_time } = body as {
+  company_id: string; professional_id: string; start_time: string; end_time: string;
+};
+
+const { data: conflicts, error: conflictErr } = await supabase
+  .from('appointments')
+  .select('id,start_time,end_time,status')
+  .eq('company_id', company_id)
+  .eq('professional_id', professional_id)
+  .neq('status', 'cancelled')
+  .lt('start_time', end_time)
+  .gt('end_time', start_time);
+
+if (conflictErr) {
+  return reply.code(500).send({ error: 'conflict_check_failed', details: conflictErr.message });
+}
+if (conflicts && conflicts.length > 0) {
+  const c = conflicts[0];
+  return reply.code(409).send({
+    error: 'double_booking',
+    message: 'Já existe agendamento que conflita com este horário.',
+    conflict: { id: c.id, start_time: c.start_time, end_time: c.end_time, status: c.status }
+  });
+}
+// === fim checagem ===
+
+// (AGORA SIM vem a linha de baixo)
+const authHeader = (req.headers['authorization'] ?? '') as string;
 
     const upstream = await fetch(`${SUPABASE_URL}/rest/v1/appointments`, {
       method: 'POST',
