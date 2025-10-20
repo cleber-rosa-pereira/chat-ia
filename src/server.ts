@@ -357,6 +357,24 @@ app.post('/appointments', async (req, reply) => {
       }
     }
 // ... aqui termina o for dos campos obrigatórios
+// === validação: end_time > start_time (ISO/UTC) ===
+const startMs = Date.parse((body as any).start_time);
+const endMs   = Date.parse((body as any).end_time);
+
+if (!Number.isFinite(startMs) || !Number.isFinite(endMs)) {
+  return reply.code(400).send({
+    error: 'bad_request',
+    message: 'start_time e end_time precisam estar em formato ISO-8601 (ex.: 2025-10-21T17:00:00Z).'
+  });
+}
+
+if (endMs <= startMs) {
+  return reply.code(400).send({
+    error: 'invalid_time_range',
+    message: 'end_time deve ser depois de start_time.'
+  });
+}
+// === fim validação tempo ===
 
 // === checagem anti "duas reservas" (cole aqui) ===
 const { company_id, professional_id, start_time, end_time } = body as {
