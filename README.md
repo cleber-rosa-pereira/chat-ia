@@ -243,3 +243,13 @@ GET /appointments/search?...&status=scheduled
 GET /appointments/search?...&status=scheduled,confirmed
 ```
 Se o parâmetro **não** for enviado, retornam **todos** os status.
+
+## PATCH /appointments/:id/status
+
+Atualiza o **status** de um agendamento existente.
+
+### Body (JSON)
+```json
+{ "status": "cancelled" }
+```
+
