@@ -214,3 +214,17 @@ GET /appointments/search?company_id=...&professional_id=...&from=2025-10-21T16:0
 - **400 Bad Request**
   - `faltando: ...` (query obrigatória ausente)
   - `invalid_time_range` (datas fora do formato ISO ou `to` ≤ `from`)
+
+### Paginação
+
+Parâmetros opcionais:
+
+- `limit`  (número de itens por página — padrão `20`, mínimo `1`, máximo `100`)
+- `offset` (deslocamento — padrão `0`)
+
+Exemplo:
+```
+GET /appointments/search?company_id=...&professional_id=...&from=2025-10-21T16:00:00Z&to=2025-10-21T21:00:00Z&limit=2&offset=0
+```
+Retorna até **2** itens a partir do primeiro. Para a “próxima página”, use `offset=2` (mantendo `limit=2`).
+
