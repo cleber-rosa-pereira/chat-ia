@@ -182,3 +182,35 @@ Lista agendamentos por **empresa** + **profissional** dentro de um **intervalo**
 > Regra de interseção: `existing.start_time < to` **e** `existing.end_time > from`.
 
 ### Exemplo
+
+```
+GET /appointments/search?company_id=...&professional_id=...&from=2025-10-21T16:00:00Z&to=2025-10-21T21:00:00Z
+```
+
+### Respostas
+- **200 OK**
+```json
+{
+  "items": [
+    {
+      "id": "UUID",
+      "company_id": "UUID",
+      "professional_id": "UUID",
+      "service_id": "UUID",
+      "customer_name": "Cliente",
+      "customer_phone": "5599...",
+      "start_time": "2025-10-21T17:00:00Z",
+      "end_time": "2025-10-21T18:00:00Z",
+      "status": "scheduled",
+      "deposit_amount": 0,
+      "deposit_status": "none",
+      "notes": "",
+      "created_at": "2025-10-20T20:04:18.4934Z"
+    }
+  ]
+}
+```
+
+- **400 Bad Request**
+  - `faltando: ...` (query obrigatória ausente)
+  - `invalid_time_range` (datas fora do formato ISO ou `to` ≤ `from`)
