@@ -168,3 +168,17 @@ Para ver logs de diagnóstico do POST /appointments:
 **PowerShell (Windows):**
 ```powershell
 $env:DEBUG="1"; npm run dev
+
+## GET /appointments/search
+
+Lista agendamentos por **empresa** + **profissional** dentro de um **intervalo** (retorna os que **intersectam** o período).
+
+### Query params (todos obrigatórios)
+- `company_id` (UUID)
+- `professional_id` (UUID)
+- `from` (ISO-8601 UTC) — início do intervalo
+- `to`   (ISO-8601 UTC) — fim do intervalo (precisa ser depois de `from`)
+
+> Regra de interseção: `existing.start_time < to` **e** `existing.end_time > from`.
+
+### Exemplo
