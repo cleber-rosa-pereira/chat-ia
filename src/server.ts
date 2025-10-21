@@ -616,6 +616,14 @@ app.get('/appointments/search', async (req, reply) => {
 const limit  = Math.max(1, Math.min(100, Number(q.limit ?? 20))); // padrão 20 (1..100)
 const offset = Math.max(0, Number.isFinite(Number(q.offset)) ? Number(q.offset) : 0);
 
+// filtro opcional por status (accepted values)
+const allowedStatus = ['scheduled','confirmed','completed','cancelled','no_show'] as const;
+const rawStatus = (q.status ?? '').toString().trim();
+// suporta múltiplos valores separados por vírgula: ?status=scheduled,confirmed
+const statuses = rawStatus
+  ? rawStatus.split(',').map(s => s.trim()).filter(s => allowedStatus.includes(s as any))
+  : [];
+
     // validação mínima
     const miss: string[] = [];
     if (!company_id) miss.push('company_id');
@@ -640,6 +648,7 @@ const offset = Math.max(0, Number.isFinite(Number(q.offset)) ? Number(q.offset) 
       .eq('professional_id', professional_id)
       .lt('start_time', to)
       .gt('end_time', from)
+      .in('status', statuses.length ? statuses : allowedStatus)
       .order('start_time', { ascending: true })
       .range(offset, offset + limit - 1);
 
