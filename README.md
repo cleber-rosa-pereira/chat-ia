@@ -228,3 +228,14 @@ GET /appointments/search?company_id=...&professional_id=...&from=2025-10-21T16:0
 ```
 Retorna até **2** itens a partir do primeiro. Para a “próxima página”, use `offset=2` (mantendo `limit=2`).
 
+### Filtro opcional por status
+
+Use `status` para filtrar 1 ou mais estados (separados por vírgula). Valores aceitos:
+`schedule`d, `confirmed`, `completed`, `cancelled`, `no_show`.
+
+Exemplos:
+```
+GET /appointments/search?...&status=scheduled
+GET /appointments/search?...&status=scheduled,confirmed
+```
+Se o parâmetro **não** for enviado, retornam **todos** os status.
