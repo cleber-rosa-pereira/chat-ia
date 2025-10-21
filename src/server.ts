@@ -605,6 +605,52 @@ app.get('/appointments/:id', async (req, reply) => {
 });
 // ===== fim 23A.13b =====
 
+// ===== 23E.1 — GET /appointments?company_id=&professional_id=&from=&to= =====
+app.get('/appointments/search', async (req, reply) => {
+  try {
+    const q = req.query as any;
+    const company_id: string = q.company_id;
+    const professional_id: string = q.professional_id;
+    const from: string = q.from; // ISO
+    const to: string = q.to;     // ISO
+
+    // validação mínima
+    const miss: string[] = [];
+    if (!company_id) miss.push('company_id');
+    if (!professional_id) miss.push('professional_id');
+    if (!from) miss.push('from');
+    if (!to) miss.push('to');
+    if (miss.length) {
+      return reply.code(400).send({ error: 'bad_request', message: `faltando: ${miss.join(', ')}` });
+    }
+
+    const fromMs = Date.parse(from);
+    const toMs = Date.parse(to);
+    if (!Number.isFinite(fromMs) || !Number.isFinite(toMs) || toMs <= fromMs) {
+      return reply.code(400).send({ error: 'invalid_time_range', message: 'use from/to em ISO-8601; to deve ser depois de from.' });
+    }
+
+    // busca dos agendamentos que intersectam o intervalo
+    const { data, error } = await supabase
+      .from('appointments')
+      .select('id,company_id,professional_id,service_id,customer_name,customer_phone,start_time,end_time,status,deposit_amount,deposit_status,notes,created_at')
+      .eq('company_id', company_id)
+      .eq('professional_id', professional_id)
+      .lt('start_time', to)
+      .gt('end_time', from)
+      .order('start_time', { ascending: true });
+
+    if (error) {
+      return reply.code(500).send({ error: 'list_failed', details: error.message });
+    }
+
+    return reply.send({ items: data ?? [] });
+  } catch (err: any) {
+    req.log?.error?.(err);
+    return reply.code(500).send({ error: 'internal_error' });
+  }
+});
+
 async function start() {
   await app.register(cors, { origin: true }); // agora o await fica dentro de uma função
   const PORT = 3333;
