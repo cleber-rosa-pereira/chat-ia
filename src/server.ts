@@ -620,8 +620,11 @@ const offset = Math.max(0, Number.isFinite(Number(q.offset)) ? Number(q.offset) 
 const allowedStatus = ['scheduled','confirmed','completed','cancelled','no_show'] as const;
 const rawStatus = (q.status ?? '').toString().trim();
 // suporta múltiplos valores separados por vírgula: ?status=scheduled,confirmed
-const statuses = rawStatus
-  ? rawStatus.split(',').map(s => s.trim()).filter(s => allowedStatus.includes(s as any))
+const statuses: string[] = rawStatus
+  ? rawStatus
+      .split(',')
+      .map((s: string) => s.trim())
+      .filter((s: string) => allowedStatus.includes(s as any))
   : [];
 
     // validação mínima
@@ -641,9 +644,12 @@ const statuses = rawStatus
     }
 
     // busca dos agendamentos que intersectam o intervalo
-    const { data, error } = await supabase
+    const { data, error, count } = await supabase
       .from('appointments')
-      .select('id,company_id,professional_id,service_id,customer_name,customer_phone,start_time,end_time,status,deposit_amount,deposit_status,notes,created_at')
+      .select(
+  'id,company_id,professional_id,service_id,customer_name,customer_phone,start_time,end_time,status,deposit_amount,deposit_status,notes,created_at',
+  { count: 'exact', head: false } // <- garante retorno de dados + count
+)    
       .eq('company_id', company_id)
       .eq('professional_id', professional_id)
       .lt('start_time', to)
@@ -656,12 +662,54 @@ const statuses = rawStatus
       return reply.code(500).send({ error: 'list_failed', details: error.message });
     }
 
-    return reply.send({ items: data ?? [] });
+    return reply.send({ items: data ?? [], count: count ?? 0 });
   } catch (err: any) {
     req.log?.error?.(err);
     return reply.code(500).send({ error: 'internal_error' });
   }
 });
+
+// ===== 23E.3 — PATCH /appointments/:id/status =====
+app.patch('/appointments/:id/status', async (req, reply) => {
+  try {
+    const { id } = req.params as { id: string };
+    if (!id) {
+      return reply.code(400).send({ error: 'bad_request', message: 'id é obrigatório' });
+    }
+
+    const body = (req.body ?? {}) as { status?: string };
+    const newStatus = (body.status ?? '').toString().trim();
+
+    // mesmos status aceitos na busca
+    const allowed = ['scheduled', 'confirmed', 'completed', 'cancelled', 'no_show'] as const;
+    if (!allowed.includes(newStatus as any)) {
+      return reply.code(400).send({
+        error: 'invalid_status',
+        message: `status deve ser um de: ${allowed.join(', ')}.`,
+      });
+    }
+
+    // atualiza no Supabase
+    const { data, error } = await supabase
+      .from('appointments')
+      .update({ status: newStatus })
+      .eq('id', id)
+      .select('id,company_id,professional_id,service_id,customer_name,customer_phone,start_time,end_time,status,deposit_amount,deposit_status,notes,created_at')
+      .single();
+
+    if (error) {
+      // se não achou, o Supabase pode retornar count 0 (ou single() sem linha)
+      // .single() lança error quando não há linha
+      return reply.code(404).send({ error: 'not_found', message: 'appointment not found' });
+    }
+
+    return reply.send(data);
+  } catch (err: any) {
+    req.log?.error?.(err);
+    return reply.code(500).send({ error: 'internal_error' });
+  }
+});
+// ===== fim 23E.3 =====
 
 async function start() {
   await app.register(cors, { origin: true }); // agora o await fica dentro de uma função
@@ -669,5 +717,6 @@ async function start() {
   await app.listen({ port: PORT, host: '0.0.0.0' });
   console.log(`🚀 API on http://localhost:${PORT}`);
 }
+
 
 start();
