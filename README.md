@@ -210,6 +210,10 @@ GET /appointments/search?company_id=...&professional_id=...&from=2025-10-21T16:0
   ]
 }
 ```
+#### Campos adicionais
+
+- `count` (number) — **total** de agendamentos que batem com o filtro (independente de `limit`/`offset`).  
+  Use para paginação: `totalPages = Math.ceil(count / limit)`.
 
 - **400 Bad Request**
   - `faltando: ...` (query obrigatória ausente)
