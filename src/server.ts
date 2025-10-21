@@ -613,6 +613,8 @@ app.get('/appointments/search', async (req, reply) => {
     const professional_id: string = q.professional_id;
     const from: string = q.from; // ISO
     const to: string = q.to;     // ISO
+const limit  = Math.max(1, Math.min(100, Number(q.limit ?? 20))); // padrão 20 (1..100)
+const offset = Math.max(0, Number.isFinite(Number(q.offset)) ? Number(q.offset) : 0);
 
     // validação mínima
     const miss: string[] = [];
@@ -638,7 +640,8 @@ app.get('/appointments/search', async (req, reply) => {
       .eq('professional_id', professional_id)
       .lt('start_time', to)
       .gt('end_time', from)
-      .order('start_time', { ascending: true });
+      .order('start_time', { ascending: true })
+      .range(offset, offset + limit - 1);
 
     if (error) {
       return reply.code(500).send({ error: 'list_failed', details: error.message });
