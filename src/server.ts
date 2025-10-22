@@ -683,11 +683,15 @@ app.patch('/appointments/:id/status', async (req, reply) => {
     // mesmos status aceitos na busca
     const allowed = ['scheduled', 'confirmed', 'completed', 'cancelled', 'no_show'] as const;
     if (!allowed.includes(newStatus as any)) {
-      return reply.code(400).send({
-        error: 'invalid_status',
-        message: `status deve ser um de: ${allowed.join(', ')}.`,
-      });
-    }
+  reply
+    .code(400)
+    .header('content-type', 'application/json; charset=utf-8')
+    .send({
+      error: 'invalid_status',
+      message: `status deve ser um de: ${allowed.join(', ')}.`,
+    });
+  return;
+}
 
     // atualiza no Supabase
     const { data, error } = await supabase
@@ -698,10 +702,13 @@ app.patch('/appointments/:id/status', async (req, reply) => {
       .single();
 
     if (error) {
-      // se não achou, o Supabase pode retornar count 0 (ou single() sem linha)
-      // .single() lança error quando não há linha
-      return reply.code(404).send({ error: 'not_found', message: 'appointment not found' });
-    }
+  // se não achou, .single() lança erro
+  reply
+    .code(404)
+    .header('content-type', 'application/json; charset=utf-8')
+    .send({ error: 'not_found', message: 'appointment not found' });
+  return;
+}
 
     return reply.send(data);
   } catch (err: any) {
