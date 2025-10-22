@@ -252,7 +252,22 @@ Atualiza o **status** de um agendamento existente.
 ```json
 { "status": "cancelled" }
 ```
+#### Erros (exemplos)
 
+**400 invalid_status**
+```json
+{
+  "error": "invalid_status",
+  "message": "status deve ser um de: scheduled, confirmed, completed, cancelled, no_show."
+}
+```
+**404 not_found**
+```json
+{
+  "error": "not_found",
+  "message": "appointment not found"
+}
+```
 ## POST /appointments — conflitos de horário (409)
 
 Se você tentar criar um agendamento que **sobrepõe** outro do **mesmo profissional** (ex.: já existe 17:00→18:00 e você envia 17:15→17:45), a API bloqueia e retorna:
