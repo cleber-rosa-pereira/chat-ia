@@ -253,3 +253,18 @@ Atualiza o **status** de um agendamento existente.
 { "status": "cancelled" }
 ```
 
+## POST /appointments — conflitos de horário (409)
+
+Se você tentar criar um agendamento que **sobrepõe** outro do **mesmo profissional** (ex.: já existe 17:00→18:00 e você envia 17:15→17:45), a API bloqueia e retorna:
+
+**Status:** `409 Conflict`  
+**Body (JSON):**
+```json
+{
+  "error": "double_booking",
+  "message": "Conflito de horário: você pediu 2025-10-21T17:15:00Z → 2025-10-21T17:45:00Z, mas já existe 2025-10-21T17:00:00Z → 2025-10-21T18:00:00Z para este profissional. Escolha outro horário livre.",
+  "requested": { "start_time": "...", "end_time": "..." },
+  "existing":  { "start_time": "...", "end_time": "..." },
+  "conflict":  { "id": "...", "status": "scheduled" }
+}
+```
